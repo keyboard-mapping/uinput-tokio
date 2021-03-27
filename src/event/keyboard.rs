@@ -1,6 +1,6 @@
 use libc::c_int;
 use ffi::*;
-use {Event};
+use crate::Event;
 use super::{Kind, Code, Press, Release};
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]

@@ -1,5 +1,5 @@
-mod builder;
+pub mod builder;
 pub use self::builder::Builder;
 
-mod device;
+pub mod device;
 pub use self::device::Device;
