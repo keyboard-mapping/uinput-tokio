@@ -5,7 +5,8 @@ use crate::{
 use ffi::*;
 use libc::c_int;
 use nix::errno::Errno;
-use nix::{self, unistd};
+use nix;
+use tokio::io::AsyncWriteExt;
 use std::path::Path;
 use std::{ffi::CString, os::unix::prelude::AsRawFd};
 use std::{mem, slice};
@@ -261,15 +262,15 @@ impl Builder {
     }
 
     /// Create the defined device.
-    pub fn create(self) -> Result<Device, Box<dyn std::error::Error>> {
-        let fd = self.file.as_raw_fd();
-
+    pub async fn create(mut self) -> Result<Device, Box<dyn std::error::Error>> {
+        // let fd = self.file.as_raw_fd();
         unsafe {
             let ptr = &self.def as *const _ as *const u8;
             let size = mem::size_of_val(&self.def);
 
-            unistd::write(fd, slice::from_raw_parts(ptr, size))?;
-            Errno::result(ui_dev_create(fd))?;
+            let file_content = slice::from_raw_parts(ptr, size);
+            self.file.write_all(file_content).await?;
+            // Errno::result(ui_dev_create(fd));
         }
 
         Ok(Device::new(self.file))
