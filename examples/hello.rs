@@ -9,7 +9,6 @@ use tokio;
 #[tokio::main]
 async fn main() {
     let mut device = uinput_tokio::default()
-        .await
         .unwrap()
         .name("test")
         .unwrap()

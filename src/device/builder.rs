@@ -4,10 +4,10 @@ use crate::{
 };
 use ffi::*;
 use libc::c_int;
-use nix::errno::Errno;
+use nix::{errno::Errno, fcntl, sys::stat};
 use nix;
 use tokio::io::AsyncWriteExt;
-use std::path::Path;
+use std::{os::unix::prelude::FromRawFd, path::Path};
 use std::{ffi::CString, os::unix::prelude::AsRawFd};
 use std::{mem, slice};
 
@@ -23,20 +23,27 @@ pub struct Builder {
 
 impl Builder {
     /// Create a builder from the specified path.
-    pub async fn open<P: AsRef<Path>>(path: P) -> Result<Self, UInputError> {
-        match tokio::fs::File::open(path).await {
-            Ok(file) => Ok(Builder {
-                file,
-                def: unsafe { mem::zeroed() },
+    pub fn open<P: AsRef<Path>>(path: P) -> Result<Self, UInputError> {
+        // let mut options = tokio::fs::OpenOptions::new();
+        // fcntl::OFlag::O_WRONLY | fcntl::OFlag::O_NONBLOCK, stat::Mode::empty()
+        // options.write(true).mode(0);
+        unsafe {
+            let fd = fcntl::open(
+                path.as_ref(),
+                fcntl::OFlag::O_WRONLY | fcntl::OFlag::O_NONBLOCK,
+                stat::Mode::empty(),
+            )?;
+            Ok(Builder {
+                file: tokio::fs::File::from_raw_fd(fd),
+                def: mem::zeroed(),
                 abs: None,
-            }),
-            Err(e) => Err(UInputError::IoError(e)),
+            })
         }
     }
 
     #[cfg(feature = "udev")]
     /// Create a builder from the default path taken from udev.
-    pub async fn default() -> Result<Self, UInputError> {
+    pub fn default() -> Result<Self, UInputError> {
         let context = udev::Context::new()?;
         let mut enumerator = udev::Enumerator::new(&context)?;
 
@@ -48,7 +55,7 @@ impl Builder {
             .next()
             .ok_or(UInputError::NotFound)?;
 
-        Ok(Builder::open(device.devnode().ok_or(UInputError::NotFound)?).await?)
+        Ok(Builder::open(device.devnode().ok_or(UInputError::NotFound)?)?)
     }
 
     #[cfg(not(feature = "udev"))]
@@ -263,14 +270,14 @@ impl Builder {
 
     /// Create the defined device.
     pub async fn create(mut self) -> Result<Device, Box<dyn std::error::Error>> {
+        let fd = self.file.as_raw_fd();
         unsafe {
             let ptr = &self.def as *const _ as *const u8;
             let size = mem::size_of_val(&self.def);
 
             let file_content = slice::from_raw_parts(ptr, size);
             self.file.write_all(file_content).await?;
-            ui_dev_create(self.file.as_raw_fd());
-            // Errno::result(ui_dev_create(fd));
+            Errno::result(ui_dev_create(fd)).unwrap();
         }
 
         Ok(Device::new(self.file))

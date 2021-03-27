@@ -25,11 +25,11 @@ pub mod device;
 pub use device::Device;
 
 /// Open the default uinput device.
-pub async fn default() -> Result<device::Builder, crate::error::Error> {
-    device::Builder::default().await
+pub fn default() -> Result<device::Builder, crate::error::Error> {
+    device::Builder::default()
 }
 
 /// Open the specified uinput device.
-pub async fn open<P: AsRef<Path>>(path: P) -> Result<device::Builder, crate::error::Error> {
-    device::Builder::open(path).await
+pub fn open<P: AsRef<Path>>(path: P) -> Result<device::Builder, crate::error::Error> {
+    device::Builder::open(path)
 }
