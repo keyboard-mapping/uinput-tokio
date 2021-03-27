@@ -4,12 +4,12 @@ use crate::{
 };
 use ffi::*;
 use libc::c_int;
+use nix::{self, unistd};
 use nix::{errno::Errno, fcntl, sys::stat};
-use nix;
-use tokio::io::AsyncWriteExt;
-use std::{os::unix::prelude::FromRawFd, path::Path};
 use std::{ffi::CString, os::unix::prelude::AsRawFd};
 use std::{mem, slice};
+use std::{os::unix::prelude::FromRawFd, path::Path};
+use tokio::io::AsyncWriteExt;
 
 #[cfg(feature = "udev")]
 use udev;
@@ -55,7 +55,9 @@ impl Builder {
             .next()
             .ok_or(UInputError::NotFound)?;
 
-        Ok(Builder::open(device.devnode().ok_or(UInputError::NotFound)?)?)
+        Ok(Builder::open(
+            device.devnode().ok_or(UInputError::NotFound)?,
+        )?)
     }
 
     #[cfg(not(feature = "udev"))]
@@ -275,9 +277,8 @@ impl Builder {
             let ptr = &self.def as *const _ as *const u8;
             let size = mem::size_of_val(&self.def);
 
-            let file_content = slice::from_raw_parts(ptr, size);
-            self.file.write_all(file_content).await?;
-            Errno::result(ui_dev_create(fd)).unwrap();
+            unistd::write(self.file.as_raw_fd(), slice::from_raw_parts(ptr, size))?;
+            Errno::result(ui_dev_create(self.file.as_raw_fd())).unwrap();
         }
 
         Ok(Device::new(self.file))
