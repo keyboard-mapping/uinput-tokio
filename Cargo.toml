@@ -1,12 +1,12 @@
 [package]
-name    = "uinput"
+name    = "uinput-tokio"
 version = "0.1.3"
 
-authors = ["meh. <meh@schizofreni.co>"]
+authors = ["ttzztztz <ttzztztz@outlook.com>"]
 license = "WTFPL"
 
 description = "Linux uinput wrapper."
-repository  = "https://github.com/meh/rust-uinput"
+repository  = "https://github.com/keyboard-mapping/uinput-tokio"
 keywords    = ["linux", "input"]
 
 [dependencies]

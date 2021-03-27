@@ -1,13 +1,13 @@
-extern crate uinput;
-use uinput::event::keyboard;
+extern crate uinput_tokio;
+use uinput_tokio::event::keyboard;
 
 use std::thread;
 use std::time::Duration;
 
 fn main() {
-	let mut device = uinput::default().unwrap()
+	let mut device = uinput_tokio::default().unwrap()
 		.name("test").unwrap()
-		.event(uinput::event::Keyboard::All).unwrap()
+		.event(uinput_tokio::event::Keyboard::All).unwrap()
 		.create().unwrap();
 
 	thread::sleep(Duration::from_secs(1));
