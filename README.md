@@ -7,16 +7,16 @@ Example
 The following example writes `hello world`.
 
 ```rust
-extern crate uinput;
-use uinput::event::keyboard;
+extern crate uinput_tokio;
+use uinput_tokio::event::keyboard;
 
 use std::thread;
 use std::time::Duration;
 
 fn main() {
-	let mut device = uinput::default().unwrap()
+	let mut device = uinput_tokio::default().unwrap()
 		.name("test").unwrap()
-		.event(uinput::event::Keyboard::All).unwrap()
+		.event(uinput_tokio::event::Keyboard::All).unwrap()
 		.create().unwrap();
 
 	thread::sleep(Duration::from_secs(1));
@@ -41,18 +41,18 @@ fn main() {
 Example mouse
 -------------
 ```rust
-extern crate uinput;
+extern crate uinput_tokio;
 
 use std::thread;
 use std::time::Duration;
-use uinput::event::controller::Controller::Mouse;
-use uinput::event::controller::Mouse::Left;
-use uinput::event::Event::{Controller, Relative};
-use uinput::event::relative::Position::{X, Y};
-use uinput::event::relative::Relative::Position;
+use uinput_tokio::event::controller::Controller::Mouse;
+use uinput_tokio::event::controller::Mouse::Left;
+use uinput_tokio::event::Event::{Controller, Relative};
+use uinput_tokio::event::relative::Position::{X, Y};
+use uinput_tokio::event::relative::Relative::Position;
 
 fn main() {
-	let mut device = uinput::default().unwrap()
+	let mut device = uinput_tokio::default().unwrap()
 		.name("test").unwrap()
 		.event(Controller(Mouse(Left))).unwrap() // It's necessary to enable any mouse button. Otherwise Relative events would not work.
 		.event(Relative(Position(X))).unwrap()
@@ -67,4 +67,5 @@ fn main() {
 		device.synchronize().unwrap();
 	}
 }
+
 ```
