@@ -1,6 +1,6 @@
 [package]
 name    = "uinput-tokio"
-version = "0.1.33"
+version = "0.1.35"
 edition = "2018"
 
 authors = ["ttzztztz <ttzztztz@outlook.com>"]
