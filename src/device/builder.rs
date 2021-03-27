@@ -263,13 +263,13 @@ impl Builder {
 
     /// Create the defined device.
     pub async fn create(mut self) -> Result<Device, Box<dyn std::error::Error>> {
-        // let fd = self.file.as_raw_fd();
         unsafe {
             let ptr = &self.def as *const _ as *const u8;
             let size = mem::size_of_val(&self.def);
 
             let file_content = slice::from_raw_parts(ptr, size);
             self.file.write_all(file_content).await?;
+            ui_dev_create(self.file.as_raw_fd());
             // Errno::result(ui_dev_create(fd));
         }
 
