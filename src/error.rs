@@ -50,6 +50,8 @@ impl fmt::Display for Error {
     }
 }
 
+impl std::error::Error for Error {}
+
 // impl error::Error for Error {
 //     fn description(&self) -> &str {
 //         return match self {

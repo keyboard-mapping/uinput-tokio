@@ -10,26 +10,22 @@ use uinput_tokio::event::relative::Relative::Position;
 use uinput_tokio::event::Event::{Controller, Relative};
 
 #[tokio::main]
-async fn main() {
-    let mut device = uinput_tokio::default()
-        .unwrap()
-        .name("test")
-        .unwrap()
-        .event(Controller(Mouse(Left)))
-        .unwrap() // It's necessary to enable any mouse button. Otherwise Relative events would not work.
-        .event(Relative(Position(X)))
-        .unwrap()
-        .event(Relative(Position(Y)))
-        .unwrap()
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let mut device = uinput_tokio::default()?
+        .name("test")?
+        .event(Controller(Mouse(Left)))?
+        // It's necessary to enable any mouse button. Otherwise Relative events would not work.
+        .event(Relative(Position(X)))?
+        .event(Relative(Position(Y)))?
         .create()
-        .await
-        .unwrap();
+        .await?;
 
     for _ in 1..10 {
         thread::sleep(Duration::from_secs(1));
 
-        device.send(X, 50).await.unwrap();
-        device.send(Y, 50).await.unwrap();
-        device.synchronize().await.unwrap();
+        device.send(X, 50).await?;
+        device.send(Y, 50).await?;
+        device.synchronize().await?;
     }
+    Ok(())
 }
