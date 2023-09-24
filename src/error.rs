@@ -49,6 +49,7 @@ impl fmt::Display for Error {
         let message = match self {
             Error::Nix(e) => e.to_string(),
             Error::Nul(e) => e.to_string(),
+            #[cfg(feature = "udev")]
             Error::Udev(e) => e.to_string(),
             Error::IoError(e) => e.to_string(),
             Error::NotFound => "Device not found.".to_string(),
