@@ -46,23 +46,16 @@ impl From<udev::Error> for Error {
 
 impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
-        f.write_str(&self.to_string())
+        let message = match self {
+            Error::Nix(e) => e.to_string(),
+            Error::Nul(e) => e.to_string(),
+            #[cfg(feature = "udev")]
+            Error::Udev(e) => e.to_string(),
+            Error::IoError(e) => e.to_string(),
+            Error::NotFound => "Device not found.".to_string(),
+        };
+        f.write_str(&message)
     }
 }
 
-// impl error::Error for Error {
-//     fn description(&self) -> &str {
-//         return match self {
-//             Error::Nix(ref err) => &err.to_string(),
-
-//             Error::Nul(ref err) => &err.to_string(),
-
-//             #[cfg(feature = "udev")]
-//             Error::Udev(ref err) => &err.to_string(),
-
-//             Error::IoError(ref err) => &err.to_string(),
-
-//             Error::NotFound => "Device not found.",
-//         };
-//     }
-// }
+impl std::error::Error for Error {}
