@@ -6,7 +6,7 @@ use ffi::*;
 use libc::c_int;
 use nix::{self, unistd};
 use nix::{errno::Errno, fcntl, sys::stat};
-use std::{ffi::CString, os::unix::prelude::AsRawFd};
+use std::{ffi::CString, os::{fd::AsFd, unix::prelude::AsRawFd}};
 use std::{mem, slice};
 use std::{os::unix::prelude::FromRawFd, path::Path};
 
@@ -71,7 +71,7 @@ impl Builder {
         let bytes = string.as_bytes_with_nul();
 
         if bytes.len() > UINPUT_MAX_NAME_SIZE as usize {
-            UInputError::Nix(nix::Error::from_errno(Errno::EINVAL));
+            UInputError::Nix(nix::Error::from(Errno::EINVAL));
         }
 
         (&mut self.def.name)[..bytes.len()].clone_from_slice(unsafe { mem::transmute(bytes) });
@@ -276,7 +276,7 @@ impl Builder {
             let ptr = &self.def as *const _ as *const u8;
             let size = mem::size_of_val(&self.def);
 
-            unistd::write(fd, slice::from_raw_parts(ptr, size))?;
+            unistd::write(self.file.as_fd(), slice::from_raw_parts(ptr, size))?;
             Errno::result(ui_dev_create(fd)).unwrap();
         }
 

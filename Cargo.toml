@@ -1,6 +1,6 @@
 [package]
 name    = "uinput-tokio"
-version = "0.1.35"
+version = "0.1.36"
 edition = "2018"
 
 authors = ["ttzztztz <ttzztztz@outlook.com>"]
@@ -12,17 +12,17 @@ keywords    = ["linux", "input"]
 
 [dependencies]
 libc       = "0.2"
-nix        = "0.10"
+nix        = { version = "0.28", features = ["fs"] }
 uinput-sys = "0.1"
 
 custom_derive = "0.1"
 enum_derive   = "0.1"
 
-tokio = { version = "1.4.0", features = ["full"] }
+tokio = { version = "1.37.0", features = ["full"] }
 
 [dependencies.libudev]
 optional = true
-version  = "0.2"
+version  = "0.3"
 
 [features]
 default = ["udev"]
